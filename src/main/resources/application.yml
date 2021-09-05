@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: non-bloking-demo
+  main:
+    banner-mode: "off"
+
+server:
+  port: 8080
+  shutdown: graceful
