@@ -3,7 +3,11 @@ spring:
     name: non-bloking-demo
   main:
     banner-mode: "off"
-
+  webflux:
+    static-path-pattern:/assets/**
 server:
   port: 8080
   shutdown: graceful
+
+client:
+  url: "https://omdbapi.com"

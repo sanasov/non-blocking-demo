@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>non-blocking demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+          integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <style>
+        .flex-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        div#app {
+            margin: 20px 20px
+        }
+
+        div select {
+            width: 200px !important;
+        }
+
+        div.table-container {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        div.table-container table {
+            width: auto;
+            margin-right: 20px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <label class="control-label"> Mode:</label>
+    <select v-model="mode" class="form-control">
+        <option>BLOCKING</option>
+        <option>WEBFLUX</option>
+        <option>CONCURRENT</option>
+    </select>
+    <br>
+    <div class="flex-container">
+        <div>
+            <div>
+                <button v-on:click="getMovies()" :disabled="isDisabled" class="btn btn-primary">get IMDB TOP 250
+                    statistics
+                </button>
+                <label v-if="timeOfStat != null" class="control-label"> Time: {{timeOfStat}} sec.</label>
+            </div>
+            <div v-if="moviesStats != null" class="table-container">
+                <table class="table table-hover table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Decade</th>
+                        <th>Number of films</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="record in moviesStats.year2Count">
+                        <td>{{record.first}}</td>
+                        <td>{{record.second}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <table class="table table-hover table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Genre</th>
+                        <th>Number of films</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="record in moviesStats.genre2Count">
+                        <td>{{record.first}}</td>
+                        <td>{{record.second}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div>
+            <div>
+                <button v-on:click="getMovieTitles()" class="btn btn-primary">get IMDB TOP 250 per
+                    request
+                </button>
+
+                <label v-if="timeOfAllReqs != null" class="control-label"> Time: {{timeOfAllReqs}} sec.</label>
+                <div style="width: 900px" v-if="movies.length > 0">{{movies}}</div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            moviesStats: null,
+            timeOfStat: null,
+            timeOfAllReqs: null,
+            mode: null,
+            pending: false,
+            movies: []
+        },
+        computed: {
+            isDisabled() {
+                return this.mode == null || this.pending
+            }
+        },
+        methods: {
+            getMovies() {
+                this.moviesStats = null
+                this.timeOfStat = null
+                this.pending = true
+                const start = new Date();
+                axios
+                    .get('http://localhost:8080/movies/' + this.mode.toLowerCase())
+                    .then(response => {
+                        this.moviesStats = response.data
+                        this.timeOfStat = (new Date() - start) / 1000
+                        this.pending = false
+                    });
+            },
+            getMovieTitles() {
+                this.movies = []
+                this.timeOfAllReqs = null
+                const start = new Date();
+                axios
+                    .get('http://localhost:8080/movies/titles')
+                    .then(response => {
+                        response.data.forEach(item =>
+                            axios
+                                .get('http://localhost:8080/movies/' + this.mode.toLowerCase() + "/" + item)
+                                .then(resp => {
+                                    this.movies.push(resp.data)
+                                    this.timeOfAllReqs = (new Date() - start) / 1000
+                                })
+                        )
+                    });
+
+
+            }
+        }
+    })
+</script>
+</body>
+</html>
