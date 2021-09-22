@@ -16,8 +16,6 @@ class WebFluxMovieService(
 
     fun getMovie(title: String) = omdbWebClient.getMovie(title)
 
-    fun getFakeMovie(title: String) = omdbWebClient.fakeClient(title)
-
     fun getMovies() =
         Flux.fromIterable(IMDB_TOP_250)
             .flatMap { title ->
@@ -28,4 +26,6 @@ class WebFluxMovieService(
                     }
             }.collectList()
             .map { MovieStatResponse.init(it) }
+
+    fun getProxyMovie(title: String): Mono<String> = omdbWebClient.proxyClient(title)
 }

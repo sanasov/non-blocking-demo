@@ -37,14 +37,15 @@
     <label class="control-label"> Mode:</label>
     <select v-model="mode" class="form-control">
         <option>BLOCKING</option>
+        <option>BLOCKING-PARALLEL</option>
         <option>WEBFLUX</option>
-        <option>CONCURRENT</option>
+        <option>COROUTINE</option>
     </select>
     <br>
     <div class="flex-container">
         <div>
             <div>
-                <button v-on:click="getMovies()" :disabled="isDisabled" class="btn btn-primary">get IMDB TOP 250
+                <button v-on:click="getMovieStatistics()" :disabled="isDisabled" class="btn btn-primary">get IMDB TOP 250
                     statistics
                 </button>
                 <label v-if="timeOfStat != null" class="control-label"> Time: {{timeOfStat}} sec.</label>
@@ -80,16 +81,16 @@
                 </table>
             </div>
         </div>
-        <div>
-            <div>
-                <button v-on:click="getMovieTitles()" class="btn btn-primary">get IMDB TOP 250 per
-                    request
-                </button>
+<!--        <div>-->
+<!--            <div>-->
+<!--                <button v-on:click="getMovieTitles()" class="btn btn-primary">get IMDB TOP 250 per-->
+<!--                    request-->
+<!--                </button>-->
 
-                <label v-if="timeOfAllReqs != null" class="control-label"> Time: {{timeOfAllReqs}} sec.</label>
-                <div style="width: 900px" v-if="movies.length > 0">{{movies}}</div>
-            </div>
-        </div>
+<!--                <label v-if="timeOfAllReqs != null" class="control-label"> Time: {{timeOfAllReqs}} sec.</label>-->
+<!--                <div style="width: 900px" v-if="movies.length > 0">{{movies}}</div>-->
+<!--            </div>-->
+<!--        </div>-->
     </div>
 </div>
 <script>
@@ -109,38 +110,36 @@
             }
         },
         methods: {
-            getMovies() {
+            getMovieStatistics() {
                 this.moviesStats = null
                 this.timeOfStat = null
                 this.pending = true
                 const start = new Date();
                 axios
-                    .get('http://localhost:8080/movies/' + this.mode.toLowerCase())
+                    .get('http://localhost:8080/movies/statistics/' + this.mode.toLowerCase())
                     .then(response => {
                         this.moviesStats = response.data
                         this.timeOfStat = (new Date() - start) / 1000
                         this.pending = false
                     });
             },
-            getMovieTitles() {
-                this.movies = []
-                this.timeOfAllReqs = null
-                const start = new Date();
-                axios
-                    .get('http://localhost:8080/movies/titles')
-                    .then(response => {
-                        response.data.forEach(item =>
-                            axios
-                                .get('http://localhost:8080/movies/' + this.mode.toLowerCase() + "/" + item)
-                                .then(resp => {
-                                    this.movies.push(resp.data)
-                                    this.timeOfAllReqs = (new Date() - start) / 1000
-                                })
-                        )
-                    });
-
-
-            }
+            // getMovieTitles() {
+            //     this.movies = []
+            //     this.timeOfAllReqs = null
+            //     const start = new Date();
+            //     axios
+            //         .get('http://localhost:8080/movies/titles')
+            //         .then(response => {
+            //             response.data.forEach(item =>
+            //                 axios
+            //                     .get('http://localhost:8080/movies/' + this.mode.toLowerCase() + "/" + item)
+            //                     .then(resp => {
+            //                         this.movies.push(resp.data)
+            //                         this.timeOfAllReqs = (new Date() - start) / 1000
+            //                     })
+            //             )
+            //         });
+            // }
         }
     })
 </script>

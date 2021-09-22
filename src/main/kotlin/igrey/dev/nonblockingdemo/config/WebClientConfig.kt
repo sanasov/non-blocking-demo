@@ -14,13 +14,14 @@ class WebClientConfig(
             .baseUrl(OMDB_URL)
             .build()
 
-    @Bean("fakeOmdb")
+    @Bean("proxy")
     fun fakeOmdbClient() =
         webClientBuilder.clone()
-            .baseUrl("http://localhost:8081")
+            .baseUrl(PROXY_URL)
             .build()
 
     companion object {
         const val OMDB_URL = "http://omdbapi.com"
+        const val PROXY_URL = "http://localhost:8081"
     }
 }

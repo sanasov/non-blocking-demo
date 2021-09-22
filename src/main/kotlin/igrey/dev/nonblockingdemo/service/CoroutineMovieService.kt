@@ -5,24 +5,22 @@ import igrey.dev.nonblockingdemo.external.OmdbHttpClient11
 import igrey.dev.nonblockingdemo.external.response.MovieStatResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import org.springframework.stereotype.Service
 
 @Service
-class ConcurrentMovieService(
+class CoroutineMovieService(
     val client: OmdbHttpClient11,
 ) {
 
-    suspend fun getMovie(title: String) = client.getMovieAsync(title)
+    suspend fun getMovieProxy(title: String) = client.getProxyMovieAsync(title)
 
     suspend fun getMovies() = coroutineScope {
-        val list = IMDB_TOP_250.map { title ->
-            async(Dispatchers.Default) {
+        val list = async(Dispatchers.IO) {
+            IMDB_TOP_250.map { title ->
                 client.getMovieAsync(title)
             }
-        }.awaitAll()
+        }.await()
         MovieStatResponse.init(list)
     }
 }

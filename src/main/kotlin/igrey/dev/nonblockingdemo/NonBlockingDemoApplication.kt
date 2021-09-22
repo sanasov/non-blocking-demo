@@ -7,5 +7,6 @@ import org.springframework.boot.runApplication
 class NonBlockingDemoApplication
 
 fun main(args: Array<String>) {
-	runApplication<NonBlockingDemoApplication>(*args)
+    runApplication<NonBlockingDemoApplication>(*args)
+    Thread.getAllStackTraces().keys.sortedBy { it.name }.forEach { println(it.name) }
 }

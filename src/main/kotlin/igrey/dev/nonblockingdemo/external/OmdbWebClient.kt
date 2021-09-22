@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @Component
 class OmdbWebClient(
     @Qualifier("omdb") private val client: WebClient,
-    @Qualifier("fakeOmdb") private val fakeClient: WebClient
+    @Qualifier("proxy") private val proxyClient: WebClient
 ) {
     fun getMovie(title: String) =
         client.get()
@@ -17,9 +17,9 @@ class OmdbWebClient(
             .retrieve()
             .bodyToMono(MovieResponse::class.java)
 
-    fun fakeClient(title: String) =
-        fakeClient.get()
-            .uri("movies/webflux/${title}")
+    fun proxyClient(title: String) =
+        proxyClient.get()
+            .uri("proxy/echo/${title}")
             .retrieve()
             .bodyToMono(String::class.java)
 }
