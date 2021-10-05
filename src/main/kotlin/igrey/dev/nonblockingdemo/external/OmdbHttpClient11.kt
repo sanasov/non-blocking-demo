@@ -32,12 +32,9 @@ class OmdbHttpClient11(
         .build()
 
     fun getMovie(title: String): MovieResponse {
-        val encodedTile = URLEncoder.encode(title, StandardCharsets.UTF_8.name())
         val request = HttpRequest.newBuilder()
             .timeout(Duration.ofSeconds(30))
-            .uri(
-                URI("$OMDB_URL?apikey=$API_KEY&t=$encodedTile")
-            )
+            .uri(URI("$OMDB_URL?apikey=$API_KEY&t=${encode(title)}"))
             .GET()
             .build()
         return toObject(
@@ -47,10 +44,9 @@ class OmdbHttpClient11(
     }
 
     suspend fun getMovieAsync(title: String): MovieResponse {
-        val encodedTile = URLEncoder.encode(title, StandardCharsets.UTF_8.name())
         val request = HttpRequest.newBuilder()
             .timeout(Duration.ofSeconds(20))
-            .uri(URI.create(OMDB_URL + "?apikey=$API_KEY&t=${encodedTile}"))
+            .uri(URI.create(OMDB_URL + "?apikey=$API_KEY&t=${encode(title)}"))
             .GET()
             .build()
         val response: CompletableFuture<HttpResponse<String>> =
@@ -59,10 +55,9 @@ class OmdbHttpClient11(
     }
 
     suspend fun getProxyMovieAsync(title: String): String {
-        val encodedTile = URLEncoder.encode(title, StandardCharsets.UTF_8.name())
         val request = HttpRequest.newBuilder()
             .timeout(Duration.ofSeconds(200))
-            .uri(URI.create(PROXY_URL + "/proxy/echo/${encodedTile}"))
+            .uri(URI.create(PROXY_URL + "/proxy/echo/${encode(title)}"))
             .GET()
             .build()
         val response: CompletableFuture<HttpResponse<String>> =
@@ -71,10 +66,9 @@ class OmdbHttpClient11(
     }
 
     fun getProxyMovie(title: String): String {
-        val encodedTile = URLEncoder.encode(title, StandardCharsets.UTF_8.name())
         val request = HttpRequest.newBuilder()
             .timeout(Duration.ofSeconds(200))
-            .uri(URI.create(PROXY_URL + "/proxy/echo/${encodedTile}"))
+            .uri(URI.create(PROXY_URL + "/proxy/echo/${encode(title)}"))
             .GET()
             .build()
         return client.send(request, HttpResponse.BodyHandlers.ofString()).body()
@@ -88,4 +82,6 @@ class OmdbHttpClient11(
         } catch (e: Exception) {
             throw RuntimeException(e)
         }
+
+    private fun encode(title: String) = URLEncoder.encode(title, StandardCharsets.UTF_8.name())
 }
