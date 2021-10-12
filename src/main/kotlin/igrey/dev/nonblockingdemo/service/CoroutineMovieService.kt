@@ -16,7 +16,7 @@ class CoroutineMovieService(
     suspend fun getMovieProxy(title: String) = client.getProxyMovieAsync(title)
 
     suspend fun getMovies() = coroutineScope {
-        val list = async(Dispatchers.IO) {
+        val list = async(Dispatchers.Default) {
             IMDB_TOP_250.map { title ->
                 client.getMovieAsync(title)
             }

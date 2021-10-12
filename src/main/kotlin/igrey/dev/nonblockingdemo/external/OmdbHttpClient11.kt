@@ -28,7 +28,7 @@ class OmdbHttpClient11(
         .version(HttpClient.Version.HTTP_2)
         .followRedirects(HttpClient.Redirect.NEVER)
         .connectTimeout(Duration.ofSeconds(20))
-       // .executor(Executors.newFixedThreadPool(1))
+        .executor(Executors.newFixedThreadPool(1))
         .build()
 
     fun getMovie(title: String): MovieResponse {
